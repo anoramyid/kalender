@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalender Pro v4 - Full Holiday</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#dc2626;--redd:#b91c1c;--ink:#1e293b;--mut:#94a3b8;--bd:#e2e8f0;--grn:#16a34a;--bg:#eef1f5}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;padding:16px}
+.card{max-width:1040px;margin:0 auto;background:#fff;border-radius:28px;overflow:hidden;box-shadow:0 20px 40px rgba(15,23,42,.15)}
+.head{background:var(--red);color:#fff;padding:22px 32px 18px;position:relative;text-align:center}
+.pill{position:absolute;left:24px;top:22px;background:#3f6b3a;color:#e8f5e4;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:5px 12px;border-radius:99px}
+.clock{position:absolute;right:24px;top:24px;font:700 11px ui-monospace,monospace;color:#ffd6d6}
+.head h1{margin:22px 0 4px;font:800 34px/1 Outfit,sans-serif;letter-spacing:-.02em;text-transform:uppercase}
+.sub{font-size:12px;font-style:italic;color:#fecaca}
+.arr{position:absolute;top:84px;background:none;border:0;color:#fff;font-size:20px;cursor:pointer;padding:8px 14px}
+#prev{left:20px}#next{right:20px}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);background:#eef2f7;padding:14px 0;text-align:center;font:700 13px Outfit,sans-serif;letter-spacing:.08em;color:#64748b}
+.dow div:first-child{color:var(--red)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;background:#e8edf3;border-top:2px solid #e8edf3}
+.cell{background:#fff;min-height:108px;padding:12px 12px 8px;position:relative;cursor:pointer}
+.cell.empty{background:#dfe6ee;cursor:default}
+.cell .d{font:700 26px/1 Outfit,sans-serif}
+.cell .h{position:absolute;right:12px;top:10px;font:700 11px ui-monospace,monospace;color:#94a3b8}
+.cell .p{margin-top:6px;font:italic 700 10px Outfit,sans-serif;letter-spacing:.02em;color:var(--grn);text-transform:uppercase}
+.cell .ev{margin-top:4px;font-size:10px;line-height:1.25;color:var(--red);font-weight:600}
+.cell.red .d{color:var(--red)}
+.cell.cb .d{color:#d97706}.cell.cb .ev{color:#b45309}
+.cell.today{background:#fff0f0;outline:2px solid var(--red);outline-offset:-2px;z-index:1}
+.cell.sel:not(.today){outline:2px solid #94a3b8;outline-offset:-2px}
+.cell.note::after{content:"";position:absolute;right:12px;bottom:10px;width:7px;height:7px;border-radius:50%;background:#3b82f6}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:28px;padding:24px 28px 32px}
+.lh{display:flex;align-items:center;gap:10px;font:800 14px Outfit,sans-serif;letter-spacing:.04em;text-transform:uppercase}
+.lh i{width:10px;height:22px;background:var(--red);border-radius:6px;display:inline-block}
+.it{display:flex;gap:10px;padding:8px 0 0 20px;font-size:13px;color:#334155}
+.it b{color:var(--red);min-width:22px}.it.c b{color:#d97706}
+.it small{color:var(--mut)}
+.notes{background:#f5f9ff;border:1px solid #dbe7f7;border-radius:18px;padding:18px 20px}
+.nh{display:flex;justify-content:space-between;align-items:center;font:700 15px Outfit,sans-serif;color:#1e3a8a}
+.cnt{background:#bfdbfe;color:#1d4ed8;font-size:11px;min-width:24px;height:24px;border-radius:99px;display:grid;place-items:center;font-weight:800}
+.sl{font-size:11px;color:#64748b;margin:8px 0 6px}
+textarea{width:100%;min-height:84px;border:1px solid #dbe7f7;border-radius:12px;background:#fff;padding:10px;font:inherit;font-size:13px;color:var(--ink);resize:vertical}
+.foot{padding:0 28px 22px;font-size:11px;color:var(--mut)}
+@media(max-width:700px){
+ .head{padding:18px 12px 14px}.head h1{font-size:24px}.pill{left:12px;top:14px;font-size:9px}.clock{right:12px;top:16px}
+ .arr{top:68px}#prev{left:4px}#next{right:4px}
+ .cell{min-height:58px;padding:6px}.cell .d{font-size:17px}.cell .h{right:5px;top:6px;font-size:8px}.cell .p{font-size:7px}.cell .ev{display:none}
+ .dow{font-size:9px;letter-spacing:0}.bottom{grid-template-columns:1fr;padding:18px 14px 24px}
+}
+</style>
+</head>
+<body>
+<div class="card">
+ <div class="head">
+  <span class="pill" id="status">Kawruh Sync Active</span><span class="clock" id="clock"></span>
+  <button class="arr" id="prev" aria-label="Bulan sebelumnya">&#9664;</button>
+  <h1 id="title"></h1><div class="sub" id="sub"></div>
+  <button class="arr" id="next" aria-label="Bulan berikutnya">&#9654;</button>
+ </div>
+ <div class="dow"><div>MINGGU</div><div>SENIN</div><div>SELASA</div><div>RABU</div><div>KAMIS</div><div>JUMAT</div><div>SABTU</div></div>
+ <div class="grid" id="grid"></div>
+ <div class="bottom">
+  <div><div class="lh"><i></i>Hari Libur &amp; Cuti Bersama</div><div id="hol"></div></div>
+  <div class="notes"><div class="nh"><span>Catatan Personal</span><span class="cnt" id="nc">0</span></div>
+   <div class="sl" id="selLabel">Pilih tanggal untuk menulis catatan</div>
+   <textarea id="note" placeholder="Tulis catatan untuk tanggal terpilih..."></textarea></div>
+ </div>
+ <div class="foot" id="foot">Sumber libur: SKB 3 Menteri (Kemenag, Kemenaker, KemenPANRB). Tanggal Hijriah perkiraan (umm al-Qura); Idulfitri/Iduladha mengikuti Keputusan Menteri Agama.</div>
+</div>
+<script>
+// ===== Data bawaan (fallback offline) – SKB No. 1205/3/2 Tahun 2026, sumber: kemenkopmk.go.id =====
+const BUILTIN = {
+ 2027: [
+  ["2027-01-01","Tahun Baru 2027 Masehi","N"],["2027-01-05","Isra Mikraj Nabi Muhammad SAW 1448 H","N"],
+  ["2027-02-05","Cuti Bersama Tahun Baru Imlek 2578","C"],["2027-02-06","Tahun Baru Imlek 2578 Kongzili","N"],
+  ["2027-03-08","Hari Suci Nyepi (Tahun Baru Saka 1949)","N"],["2027-03-09","Cuti Bersama Idul Fitri 1448 H","C"],
+  ["2027-03-10","Idul Fitri 1448 H","N"],["2027-03-11","Idul Fitri 1448 H","N"],
+  ["2027-03-12","Cuti Bersama Idul Fitri 1448 H","C"],["2027-03-15","Cuti Bersama Idul Fitri 1448 H","C"],
+  ["2027-03-25","Cuti Bersama Wafat Yesus Kristus","C"],["2027-03-26","Wafat Yesus Kristus","N"],
+  ["2027-03-28","Kebangkitan Yesus Kristus (Paskah)","N"],["2027-05-01","Hari Buruh Internasional","N"],
+  ["2027-05-06","Kenaikan Yesus Kristus","N"],["2027-05-17","Idul Adha 1448 H","N"],
+  ["2027-05-18","Cuti Bersama Idul Adha 1448 H","C"],["2027-05-19","Cuti Bersama Waisak 2571 BE","C"],
+  ["2027-05-20","Hari Raya Waisak 2571 BE","N"],["2027-06-01","Hari Lahir Pancasila","N"],
+  ["2027-06-06","1 Muharam Tahun Baru Islam 1449 H","N"],["2027-08-15","Maulid Nabi Muhammad SAW","N"],
+  ["2027-08-17","Proklamasi Kemerdekaan RI","N"],["2027-12-24","Cuti Bersama Kelahiran Yesus Kristus","C"],
+  ["2027-12-25","Kelahiran Yesus Kristus","N"],["2027-12-26","Isra Mikraj Nabi Muhammad SAW 1449 H","N"]
+ ]
+};
+
+const MONTHS=["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+const PASARAN=["Legi","Pahing","Pon","Wage","Kliwon"];
+const HMON=["Muharam","Safar","Rabiulawal","Rabiulakhir","Jumadil Awal","Jumadil Akhir","Rajab","Sya'ban","Ramadan","Syawal","Zulkaidah","Zulhijah"];
+const FIXED=[["01-01","Tahun Baru Masehi"],["05-01","Hari Buruh Internasional"],["06-01","Hari Lahir Pancasila"],["08-17","Proklamasi Kemerdekaan RI"],["12-25","Kelahiran Yesus Kristus"]];
+let DB={},src={},sel=null;
+const t0=new Date();let cur=new Date(t0.getFullYear(),t0.getMonth(),1);
+const pad=n=>String(n).padStart(2,"0"),key=(y,m,d)=>`${y}-${pad(m+1)}-${pad(d)}`;
+function ingest(y,rows,s){const m=new Map();rows.forEach(r=>{const [d,name,type]=Array.isArray(r)?r:[r.date,r.name,r.type];if(!m.has(d))m.set(d,[]);m.get(d).push({name,type});});DB[y]=m;src[y]=s;}
+async function loadYear(y){
+ if(DB[y])return;
+ try{const r=await fetch("holidays.json",{cache:"no-cache"});if(r.ok){const j=await r.json();Object.keys(j).forEach(k=>{if(!DB[k]&&j[k]&&j[k].length)ingest(k,j[k],"file")});}}catch(e){}
+ if(DB[y])return;
+ if(BUILTIN[y]){ingest(y,BUILTIN[y],"builtin");return;}
+ ingest(y,FIXED.map(([md,n])=>[`${y}-${md}`,n,"N"]),"fixed");
+}
+const pasaran=d=>PASARAN[(Math.floor(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())/864e5)+3)%5];
+let HF;try{HF=new Intl.DateTimeFormat("en-u-ca-islamic-umalqura",{day:"numeric",month:"numeric",year:"numeric"});}catch(e){}
+function hijri(d){if(!HF)return null;const o={};HF.formatToParts(d).forEach(p=>{if(p.type!=="literal"&&p.type!=="era")o[p.type]=+p.value});return o;}
+const notesGet=()=>{try{return JSON.parse(localStorage.getItem("kal_notes")||"{}")}catch(e){return {}}};
+const notesSet=n=>{try{localStorage.setItem("kal_notes",JSON.stringify(n))}catch(e){}};
+
+async function render(){
+ const y=cur.getFullYear(),m=cur.getMonth();await loadYear(y);
+ document.getElementById("title").textContent=`${MONTHS[m]} ${y}`;
+ const n=new Date(y,m+1,0).getDate(),a=hijri(new Date(y,m,1)),b=hijri(new Date(y,m,n));
+ document.getElementById("sub").textContent=a&&b?(a.month===b.month?`${HMON[a.month-1]} ${b.year}H`:`${HMON[a.month-1]} \u2014 ${HMON[b.month-1]} ${b.year}H`):"";
+ const g=document.getElementById("grid");g.innerHTML="";
+ const first=new Date(y,m,1).getDay(),notes=notesGet(),t=new Date();
+ for(let i=0;i<first;i++)g.insertAdjacentHTML("beforeend",'<div class="cell empty"></div>');
+ for(let d=1;d<=n;d++){
+  const k=key(y,m,d),h=DB[y].get(k)||[],dt=new Date(y,m,d),hj=hijri(dt);
+  const nat=h.some(x=>x.type==="N"),cb=!nat&&h.some(x=>x.type==="C");
+  const c=["cell",(dt.getDay()===0||nat)?"red":"",cb?"cb":"",(t.getFullYear()===y&&t.getMonth()===m&&t.getDate()===d)?"today":"",sel===k?"sel":"",notes[k]?"note":""].join(" ");
+  g.insertAdjacentHTML("beforeend",`<div class="cell ${c.slice(5)}" data-k="${k}"><div class="d">${d}</div><div class="h">${hj?hj.day:""}</div><div class="p">${pasaran(dt)}</div>${h[0]?`<div class="ev">${h[0].name}</div>`:""}</div>`);
+ }
+ const rest=(7-(first+n)%7)%7;for(let i=0;i<rest;i++)g.insertAdjacentHTML("beforeend",'<div class="cell empty"></div>');
+ g.querySelectorAll(".cell:not(.empty)").forEach(e=>e.onclick=()=>{sel=e.dataset.k;showNote();render();});
+ const list=[...DB[y].entries()].filter(([d])=>d.startsWith(`${y}-${pad(m+1)}`)).sort();
+ document.getElementById("hol").innerHTML=list.length?list.map(([d,arr])=>arr.map(x=>`<div class="it ${x.type==="C"?"c":""}"><b>${+d.slice(8)}</b><span>${x.name}${x.type==="C"?' <small>(cuti bersama)</small>':""}</span></div>`).join("")).join(""):'<div class="it"><small>Tidak ada libur bulan ini.</small></div>';
+ document.getElementById("nc").textContent=Object.values(notes).filter(Boolean).length;
+ const s={file:"holidays.json",builtin:"data bawaan SKB",fixed:"libur tetap saja (SKB belum tersedia)"}[src[y]];
+ document.getElementById("foot").title="Sumber data "+y+": "+s;
+}
+function showNote(){
+ const notes=notesGet(),[Y,M,D]=sel.split("-").map(Number),dt=new Date(Y,M-1,D);
+ const dn=["Minggu","Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"][dt.getDay()],hj=hijri(dt);
+ document.getElementById("selLabel").textContent=`${dn}, ${D} ${MONTHS[M-1]} ${Y} \u00b7 ${pasaran(dt)}`+(hj?` \u00b7 ${hj.day} ${HMON[hj.month-1]} ${hj.year}H`:"");
+ document.getElementById("note").value=notes[sel]||"";
+}
+document.getElementById("note").oninput=e=>{if(!sel)return;const n=notesGet();n[sel]=e.target.value;if(!e.target.value)delete n[sel];notesSet(n);};
+document.getElementById("note").onblur=render;
+document.getElementById("prev").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()-1,1);render();};
+document.getElementById("next").onclick=()=>{cur=new Date(cur.getFullYear(),cur.getMonth()+1,1);render();};
+setInterval(()=>{const d=new Date();document.getElementById("clock").textContent=[d.getHours(),d.getMinutes(),d.getSeconds()].map(pad).join(".")},1000);
+render();
+</script>
+</body>
+</html>
